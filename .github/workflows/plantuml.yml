@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - warmhouse
   pull_request:
     branches:
       - main
+      - warmhouse
 
 jobs:
   generate-diagrams:
@@ -30,6 +32,7 @@ jobs:
         plantuml diagrams/container/*.puml
         plantuml diagrams/component/*.puml
         plantuml diagrams/code/*.puml
+        plantuml diagrams/er/*.puml
 
     - name: Commit Diagrams
       run: |
