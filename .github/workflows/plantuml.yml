@@ -33,13 +33,29 @@ jobs:
 
       - name: Generate Diagrams
         run: |
-          for dir in diagrams diagrams/*; do
-            if [ -d "$dir" ] && [ -n "$(find "$dir" -name '*.puml' -print -quit)" ]; then
-              plantuml "$dir"/*.puml
-            else
-              echo "No PUML files found in $dir or directory doesn't exist, skipping..."
-            fi
-          done
+          echo "Starting PlantUML processing..."
+          
+          # Обработка diagrams/*.puml
+          if ls diagrams/*.puml 1> /dev/null 2>&1; then
+            for file in diagrams/*.puml; do
+              echo "Processing: $file"
+              plantuml "$file"
+            done
+          else
+          echo "No files found in diagrams/*.puml"
+          fi
+          
+          # Обработка diagrams/*/*.puml
+          if ls diagrams/*/*.puml 1> /dev/null 2>&1; then
+            for file in diagrams/*/*.puml; do
+              echo "Processing: $file"
+              plantuml "$file"
+            done
+          else
+          echo "No files found in diagrams/*/*.puml"
+          fi
+
+          echo "Finished!"
 
       - name: Commit Diagrams
         run: |
