@@ -15,7 +15,7 @@ Container(container_event_message_bus, "Container Event Message Bus", "Kafka  cl
 
 
 Container_Boundary(devicemgmt, "Device Management") {
-    Component(devicemgmt_rest, "Device Management Controller", "Rest Controller", "обработка запросов с UI")
+  Component(devicemgmt_rest, "Device Management Controller", "Rest Controller", "обработка запросов с UI")
 	Component(devicemgmt_mqtt, "Device Management Pub-Sub", "MQTT Provider", "обработка данных с устройств и управление устройствами")
 	Component(devicemgmt_service, "Device Management Service", "Service", "служба регистрации, изменения устройств")
 	Component(devicemgmt_kafka, "Device Management Siblings Pub-Sub", "Kafka Provider", "обмен сообщениями другими микросервисами")
@@ -34,7 +34,7 @@ Container_Boundary(devicemgmt, "Device Management") {
 
 Container_Boundary(control_core, "Device Control Core") {
 	Component(control_core_mqtt, "Control Core Devices Pub-Sub", "MQTT Provider", "обработка данных с устройств и управление устройствами")
-    Component(control_core_kafka, "Control Core Siblings Pub-Sub", "Kafka Provider", "обмен сообщениями другими микросервисами")
+  Component(control_core_kafka, "Control Core Siblings Pub-Sub", "Kafka Provider", "обмен сообщениями другими микросервисами")
 	Component(control_core_service, "Control Core Service", "Service", "служба управления устройствами")
 	Component(control_core_dao, "DAO", "Repository")
 
