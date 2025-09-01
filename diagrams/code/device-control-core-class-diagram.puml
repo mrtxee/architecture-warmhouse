@@ -1,0 +1,122 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+title "Warmhouse Device Control Core class diagram"
+
+top to bottom direction
+!pragma useVerticalIf on
+
+package "org.warmhouse.controlcore" #DDDDDD {
+
+  class AutomationRule {
+    +Long id
+    +String name
+    +Long triggerDeviceId
+    +String triggerParameter
+    +String triggerOperator
+    +String triggerValue
+    +Long actionDeviceId
+    +String actionType
+    +String actionParameter
+    +String actionValue
+    +Boolean isActive
+  }
+  interface AutomationRuleJpaRepository {
+    +List<AutomationRule> findByIsActiveTrue()
+    +List<AutomationRule> findByTriggerDeviceId(Long deviceId)
+  }
+  class ScheduledRule {
+    + Long id
+    + String name
+    + String cronExpression
+    + String timeZone
+    + Long actionDeviceId
+    + String actionType
+    + String actionParameter
+    + String actionValue
+    + Boolean isActive
+    + isTimeToExecute(Instant) : Boolean
+  }
+  interface ScheduledRuleJpaRepository {
+    +List<ScheduledRule> findByIsActiveTrue()
+  }
+
+  class AutomationRuleCache {
+    -Map<Long, List<AutomationRule>> rulesByDeviceId
+    +getRulesForDevice(Long deviceId):List<AutomationRule>
+    +rebuildCache()
+  }
+  class DeviceTelemetryDto {
+    +Long deviceId
+    +Map<String, Object> readings
+    +Instant timestamp
+  }
+  class DeviceCommandDto {
+    +Long deviceId
+    +String commandType
+    +String parameter
+    +String value
+  }
+  class AutomationRuleEngine {
+    -AutomationRuleCache automationRuleCache
+    -DeviceControlService deviceControlService
+    +processTelemetry(DeviceTelemetryDto dto)
+  }
+  class SchedulerRuleEngine {
+    -ScheduledRuleJpaRepository scheduledRuleJpaRepository
+    -DeviceControlService deviceControlService
+    -ScheduledExecutorService scheduledExecutorService
+    -rescheduleRule(ScheduledRule rule)
+  }
+  interface DeviceControlService {
+    +sendCommand(DeviceCommandDto command)
+  }
+  class MqttListener {
+    -AutomationRuleEngine ruleEngine
+    +handleIncomingMessage(String topic, byte[] payload)
+  }
+
+  class KafkaListener {
+    -DeviceControlService deviceControlService
+    +handleIncomingMessage(String topic, byte[] payload)
+  }
+
+  AutomationRuleJpaRepository --> AutomationRule : JPA
+
+  AutomationRuleCache --> AutomationRuleJpaRepository : depends
+  AutomationRuleCache --> AutomationRule : contains
+  AutomationRuleEngine --> AutomationRuleCache : uses
+  AutomationRuleEngine --> DeviceControlService : uses
+  MqttListener --> AutomationRuleEngine : uses
+  MqttListener --> DeviceTelemetryDto : creates
+  KafkaListener --> DeviceControlService : uses
+  AutomationRuleEngine --> DeviceTelemetryDto : processes
+  AutomationRuleEngine --> DeviceCommandDto : creates
+
+  ScheduledRuleJpaRepository --> ScheduledRule : JPA
+  SchedulerRuleEngine --> ScheduledRuleJpaRepository : uses
+  SchedulerRuleEngine --> DeviceControlService : uses
+  SchedulerRuleEngine --> DeviceCommandDto : creates
+  SchedulerRuleEngine --> ScheduledRule : contains
+
+}
+
+
+namespace Legend {
+  class Dummy {
+   -privateField
+   #protectedField
+   ~packagePrivateMethod()
+   +pubcilcMethod()
+  }
+
+  enum EnumSample {
+	  DAYS
+	  HOURS
+	  MINUTES
+  }
+
+  Dummy --> EnumSample : uses
+}
+
+@enduml

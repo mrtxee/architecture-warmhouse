@@ -1,0 +1,106 @@
+asyncapi: 3.0.0
+info:
+  title: Warmhouse Device Telemetry Processing API
+  version: 1.0.0
+  description: API для обработки телеметрии IoT устройств через MQTT
+  contact:
+    name: yandex practicum team
+    email: mrtxee@ya.ru
+
+servers:
+  mqttBroker:
+    host: mqtt://broker.warmhouse.com:1883
+    protocol: mqtt
+    description: MQTT-IOT брокер
+    security:
+      - $ref: '#/components/securitySchemes/certificateAuthentication'
+
+channels:
+  device.telemetry.{deviceId}:
+    address: device/telemetry/{deviceId}
+    description: Канал для телеметрии конкретного устройства
+    parameters:
+      deviceId:
+        $ref: '#/components/parameters/deviceId'
+    messages:
+      telemetryMessage:
+        $ref: '#/components/messages/DeviceTelemetryMessage'
+
+  device.telemetry.all:
+    address: device/telemetry/+
+    description: Канал для телеметрии всех устройств
+    messages:
+      telemetryMessage:
+        $ref: '#/components/messages/DeviceTelemetryMessage'
+
+components:
+  messages:
+    DeviceTelemetryMessage:
+      name: deviceTelemetryMessage
+      title: Device Telemetry Message
+      summary: Сообщение с телеметрией устройства
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/DeviceTelemetryDto'
+      headers:
+        type: object
+        properties:
+          timestamp:
+            type: string
+            format: date-time
+            description: Время создания сообщения
+          messageId:
+            type: string
+            format: uuid
+            description: UUID сообщения
+          deviceType:
+            type: string
+            description: Тип устройства
+
+  schemas:
+    DeviceTelemetryDto:
+      type: object
+      required:
+        - deviceId
+        - timestamp
+        - readings
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор устройства
+        timestamp:
+          type: string
+          format: date-time
+          description: Время снятия показаний
+        readings:
+          type: object
+          description: Показания датчиков
+          additionalProperties:
+            oneOf:
+              - type: number
+                format: float
+              - type: boolean
+              - type: string
+          examples:
+            - temperature: 23.5
+              humidity: 45.2
+              pressure: 1013.25
+              motion: true
+              status: "online"
+        batteryLevel:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: Уровень заряда батареи в процентах
+        signalStrength:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: Уровень сигнала (0-5)
+
+    securitySchemes:
+      certificateAuthentication:
+        type: x509
+        description: Аутентификация с помощью клиентского сертификата

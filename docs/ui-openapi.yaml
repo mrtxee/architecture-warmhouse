@@ -1,0 +1,333 @@
+openapi: 3.0.4
+info:
+  title: Warmhouse UI API
+  version: 1.0.0
+  contact:
+    name: yandex practicum team
+    email: mrtxee@ya.ru
+
+#servers:
+#  - url: https://api.warmhouse.com:8080/v1
+#  - url: http://api.warmhouse.com:8080/v1
+#    description: резервный сервер
+
+paths:
+  /house:
+    get:
+      responses:
+        200:
+          description: Список домов пользователя
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Home'
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Home"
+      responses:
+        200:
+          description: Добавлена сущность
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Home"
+
+  /house/{home_id}:
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Home"
+      responses:
+        200:
+          description: Изменена сущность
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Home"
+    delete:
+      responses:
+        200:
+          description: Удалена сущность
+
+  /house/{home_id}/rooms:
+    get:
+      responses:
+        200:
+          description: Список комнат в доме
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Room'
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Room"
+      responses:
+        200:
+          description: Добавлена сущность
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+
+
+  /rooms/{room_id}:
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Room"
+      responses:
+        200:
+          description: Изменена сущность
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Room"
+    delete:
+      responses:
+        200:
+          description: Удалена сущность
+
+  /house/{home_id}/devices:
+    get:
+      responses:
+        200:
+          description: Список устройств в доме
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+  /room/{room_id}/devices:
+    get:
+      responses:
+        200:
+          description: Список устройств в комнате
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+
+  /device/{device_id}:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Device"
+      responses:
+        200:
+          description: Добавлена сущность
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Device"
+      responses:
+        200:
+          description: Изменена сущность
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+    delete:
+      responses:
+        200:
+          description: Удалена сущность
+
+
+  /automatition:
+    get:
+      responses:
+        200:
+          description: Список сценариев автоматизации
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceAutomationRule'
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceAutomationRule"
+      responses:
+        200:
+          description: Добавлена сущность
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceAutomationRule"
+  /automatition/{automatition_id}:
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceAutomationRule"
+      responses:
+        200:
+          description: Изменена сущность
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceAutomationRule"
+    delete:
+      responses:
+        200:
+          description: Удалена сущность
+
+  /schedule:
+    get:
+      responses:
+        200:
+          description: Список сценариев автоматизации
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceScheduleRule'
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceScheduleRule"
+      responses:
+        200:
+          description: Добавлена сущность
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceScheduleRule"
+  /schedule/{automatition_id}:
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeviceScheduleRule"
+      responses:
+        200:
+          description: Изменена сущность
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceScheduleRule"
+    delete:
+      responses:
+        200:
+          description: Удалена сущность
+
+
+
+components:
+
+  schemas:
+
+    Home:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: "ид пользователя"
+        name:
+          type: string
+        description:
+          type: string
+
+    Room:
+      type: object
+      properties:
+        home_id:
+          type: integer
+          description: "ид дома"
+        name:
+          type: string
+        description:
+          type: string
+
+    Device:
+      type: object
+      properties:
+        device_type_id:
+          type: integer
+          description: "тип устройства"
+        room_id:
+          type: integer
+          description: "помещение"
+        name:
+          type: string
+        description:
+          type: string
+
+    DeviceScheduleRule:
+      type: object
+      properties:
+        cron_expression:
+          type: string
+          description: "метка расписания"
+        action_device_id:
+          type: integer
+          description: "устройство - исполнитель"
+        action:
+          description: "действие исполнителя"
+          type: object
+        name:
+          type: string
+        is_active:
+          type: boolean
+
+    DeviceAutomationRule:
+      type: object
+      properties:
+        trigger_device_id:
+          type: integer
+          description: "устройство - триггер"
+        trigger_condition:
+          type: object
+          description: "условие триггер для запуска действия"
+        action_device_id:
+          type: integer
+          description: "устройство - исполнитель"
+        action:
+          description: "действие исполнителя"
+          type: object
+        name:
+          type: string
+        is_active:
+          type: boolean

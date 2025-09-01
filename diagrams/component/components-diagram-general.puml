@@ -1,0 +1,79 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+' uncomment the following line and comment the first to use locally
+' !include C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Диаграмма компонентов АСУ Теплый дом
+
+Container(ui, "UI АСУ Теплый дом", "TypeScript, React", "Интерфейс пользователя для управления системой")
+ContainerDb(rbac_db, "User DB", "PostgresSQL", "Хранение учётных записей пользователей, ролей и прав")
+ContainerDb(devicemgmt_db, "Device Management DB", "PostgresSQL", "Хранение данных об устройствах и их режимах работы")
+Container(device_event_message_bus, "Device event Message Bus", "EMQX cluster with Bootstrap server", "Транспорт событий аппаратной части системы")
+Container(container_event_message_bus, "Container Event Message Bus", "Kafka  cluster with Bootstrap server", "Лог и взаимодействие контейнеров, в т.ч. discovery через хореография")
+
+
+Container_Boundary(devicemgmt, "Device Management") {
+    Component(devicemgmt_rest, "Device Management Controller", "Rest Controller", "обработка запросов с UI")
+	Component(devicemgmt_mqtt, "Device Management Pub-Sub", "MQTT Provider", "обработка данных с устройств и управление устройствами")
+	Component(devicemgmt_service, "Device Management Service", "Service", "служба регистрации, изменения устройств")
+	Component(devicemgmt_kafka, "Device Management Siblings Pub-Sub", "Kafka Provider", "обмен сообщениями другими микросервисами")
+	Component(devicemgmt_dao, "DAO", "Repository")
+
+  Rel(devicemgmt_rest, devicemgmt_service, "Uses")
+  Rel(devicemgmt_mqtt, devicemgmt_service, "Uses")
+  Rel(devicemgmt_kafka, devicemgmt_service, "Uses")
+  Rel(devicemgmt_service, devicemgmt_dao, "Uses")
+
+  Rel(devicemgmt_dao, devicemgmt_db, "CRUD", "JDBC")
+	Rel(device_event_message_bus, devicemgmt_mqtt, "сообщения от устройств", "MQTT")
+	Rel_Back(device_event_message_bus, devicemgmt_mqtt, "команды устройствам", "MQTT")
+	Rel(devicemgmt_kafka, container_event_message_bus, "хореография, лог", "kafka native protocol")
+}
+
+Container_Boundary(control_core, "Device Control Core") {
+	Component(control_core_mqtt, "Control Core Devices Pub-Sub", "MQTT Provider", "обработка данных с устройств и управление устройствами")
+    Component(control_core_kafka, "Control Core Siblings Pub-Sub", "Kafka Provider", "обмен сообщениями другими микросервисами")
+	Component(control_core_service, "Control Core Service", "Service", "служба управления устройствами")
+	Component(control_core_dao, "DAO", "Repository")
+
+	Rel(control_core_service, control_core_dao, "Uses")
+	Rel(control_core_service, control_core_mqtt, "Uses")
+	Rel(control_core_service, control_core_kafka, "Uses")
+
+	Rel(control_core_dao, devicemgmt_db, "CRUD", "JDBC")
+	Rel(control_core_kafka, container_event_message_bus, "хореография, лог", "kafka native protocol")
+}
+
+Container_Boundary(rbac, "User & Access Management") {
+  Component(rbac_rest, "User Controller", "Rest Controller", "обработка запросов с UI")
+  Component(rbac_user, "User Service", "Service", "управление пользователями")
+  Component(rbac_access, "Access Service", "Service", "управление доступом")
+	Component(rbac_dao, "DAO", "Repository")
+  Component(rbac_kafka, "Kafka Pub", "Kafka Producer", "обмен сообщениями другими микросервисами")
+
+  Rel(rbac_rest, rbac_user, "Uses")
+  Rel(rbac_rest, rbac_access, "Uses")
+	Rel(rbac_user, rbac_dao, "Uses")
+  Rel(rbac_access, rbac_dao, "Uses")
+  Rel(rbac_dao, rbac_db, "CRUD", "JDBC")
+	Rel(rbac_kafka, container_event_message_bus, "регистрация в системе, лог", "kafka native protocol")
+}
+
+SHOW_PERSON_OUTLINE()
+Person(user, "User", "Пользователь системы")
+
+Container(api_gateaway, "API Gateway", "Java, Spring Cloud Gateway", "Eдиная точка входа (entry point) для всех клиентских запросов")
+Rel(ui, api_gateaway, "запросы UI", "sync, rest, https")
+Rel(api_gateaway, rbac_rest, "запросы UI", "sync, rest, https")
+Rel(api_gateaway, devicemgmt_rest, "запросы UI", "sync, rest, https")
+Rel(user, ui, "запросы UI", "sync, rest, https")
+
+System_Ext(heater, "Система отопления", "Аппаратный контроллер системы отопления")
+System_Ext(sensor, "Датчик температуры", "Сообщает телеметрию в АСУ «Теплый дом»")
+Rel(sensor, device_event_message_bus, "телеметрия", "ayncApi, MQTT")
+Rel_Back(heater, device_event_message_bus, "управление", "ayncApi, MQTT")
+
+
+@enduml
