@@ -1,15 +1,18 @@
 @startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+' uncomment the following line and comment the first to use locally
+' !include C4_Component.puml
 
 LAYOUT_WITH_LEGEND()
 
 title Диаграмма компонентов АСУ Теплый дом
 
 Container(ui, "UI АСУ Теплый дом", "TypeScript, React", "Интерфейс пользователя для управления системой")
-ContainerDb(rbac_db, "User DB", "PostgreSQL", "Хранение учётных записей пользователей, ролей и прав")
-ContainerDb(devicemgmt_db, "Device Management DB", "PostgreSQL", "Хранение данных об устройствах и их режимах работы")
+ContainerDb(rbac_db, "User DB", "PostgresSQL", "Хранение учётных записей пользователей, ролей и прав")
+ContainerDb(devicemgmt_db, "Device Management DB", "PostgresSQL", "Хранение данных об устройствах и их режимах работы")
 Container(device_event_message_bus, "Device event Message Bus", "EMQX cluster with Bootstrap server", "Транспорт событий аппаратной части системы")
-Container(container_event_message_bus, "Container Event Message Bus", "Kafka cluster with Bootstrap server", "Лог и взаимодействие контейнеров, в т.ч. discovery через хореографию")
+Container(container_event_message_bus, "Container Event Message Bus", "Kafka  cluster with Bootstrap server", "Лог и взаимодействие контейнеров, в т.ч. discovery через хореография")
+
 
 Container_Boundary(devicemgmt, "Device Management") {
   Component(devicemgmt_rest, "Device Management Controller", "Rest Controller", "обработка запросов с UI")
@@ -25,7 +28,7 @@ Container_Boundary(devicemgmt, "Device Management") {
 
   Rel(devicemgmt_dao, devicemgmt_db, "CRUD", "JDBC")
   Rel(device_event_message_bus, devicemgmt_mqtt, "сообщения от устройств", "MQTT")
-  Rel_R(device_event_message_bus, devicemgmt_mqtt, "команды устройствам", "MQTT")
+  Rel_Back(device_event_message_bus, devicemgmt_mqtt, "команды устройствам", "MQTT")
   Rel(devicemgmt_kafka, container_event_message_bus, "хореография, лог", "kafka native protocol")
 }
 
@@ -58,19 +61,19 @@ Container_Boundary(rbac, "User & Access Management") {
   Rel(rbac_kafka, container_event_message_bus, "регистрация в системе, лог", "kafka native protocol")
 }
 
+SHOW_PERSON_OUTLINE()
 Person(user, "User", "Пользователь системы")
 
-Container(api_gateway, "API Gateway", "Java, Spring Cloud Gateway", "Единая точка входа для всех клиентских запросов")
-
+Container(api_gateaway, "API Gateway", "Java, Spring Cloud Gateway", "Eдиная точка входа (entry point) для всех клиентских запросов")
+Rel(ui, api_gateaway, "запросы UI", "sync, rest, https")
+Rel(api_gateaway, rbac_rest, "запросы UI", "sync, rest, https")
+Rel(api_gateaway, devicemgmt_rest, "запросы UI", "sync, rest, https")
 Rel(user, ui, "запросы UI", "sync, rest, https")
-Rel(ui, api_gateway, "запросы UI", "sync, rest, https")
-Rel(api_gateway, rbac_rest, "запросы UI", "sync, rest, https")
-Rel(api_gateway, devicemgmt_rest, "запросы UI", "sync, rest, https")
 
 System_Ext(heater, "Система отопления", "Аппаратный контроллер системы отопления")
 System_Ext(sensor, "Датчик температуры", "Сообщает телеметрию в АСУ «Теплый дом»")
+Rel(sensor, device_event_message_bus, "телеметрия", "ayncApi, MQTT")
+Rel_Back(heater, device_event_message_bus, "управление", "ayncApi, MQTT")
 
-Rel(sensor, device_event_message_bus, "телеметрия", "async, MQTT")
-Rel_R(heater, device_event_message_bus, "управление", "async, MQTT")
 
 @enduml

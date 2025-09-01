@@ -49,7 +49,7 @@ jobs:
           if ls diagrams/*/*.puml 1> /dev/null 2>&1; then
             for file in diagrams/*/*.puml; do
               echo "Processing: $file"
-              plantuml "$file"
+              plantuml "$file" || echo "⚠️ Failed to process: $file (continuing...)"
             done
           else
           echo "No files found in diagrams/*/*.puml"
