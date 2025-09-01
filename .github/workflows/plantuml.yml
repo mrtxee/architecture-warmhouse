@@ -66,9 +66,9 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            CURRENT_BRANCH=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
-            echo "Detected current branch: $CURRENT_BRANCH"
+            BRANCH_NAME="${{ github.ref_name }}"
+            echo "Using branch: $BRANCH_NAME"
             git commit -m "Automated diagram generation"
-            git push origin $CURRENT_BRANCH
+            git push origin HEAD:$BRANCH_NAME
           fi
         if: success()
