@@ -22,7 +22,7 @@ System_Boundary(acs, "АСУ «Теплый дом»") {
 
 	Container(device_event_message_bus, "Device event Message Bus", "EMQX cluster with Bootstrap server", "Транспорт событий аппаратной части системы")
 
-	Container(container_event_message_bus, "Container Event Message Bus", "Kafka  cluster with Bootstrap server", "Лог событий, взаимодействие контейнеров, хореография")
+	Container(container_event_message_bus, "Container Event Message Bus", "Kafka cluster with Bootstrap server", "Лог событий, взаимодействие контейнеров, хореография")
 
 	Rel(user, ui, "uses", "https")
 	Rel(ui, api_gateaway, "OpenApi", "sync, json, https")
