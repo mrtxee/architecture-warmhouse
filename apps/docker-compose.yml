@@ -5,9 +5,8 @@ services:
     image: postgres:16-alpine
     container_name: smarthome-postgres
     environment:
-      POSTGRES_DB: smarthome_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
       - "5432:5432"
     volumes:
@@ -16,12 +15,17 @@ services:
     networks:
       - smarthome-network
     restart: unless-stopped
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 
   temperature-api:
     build:
-      context: ./smart_home
+      context: ./temperature-api
       dockerfile: Dockerfile
     container_name: temperature-api-container
     ports:
@@ -43,6 +47,10 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/smarthome
       - TEMPERATURE_API_URL=http://temperature-api:8081
+#      - POSTGRES_DB=smarthome
+#      - POSTGRES_USER=postgres
+#      - POSTGRES_PASSWORD=postgres
+
     ports:
       - "8080:8080"
     restart: unless-stopped
