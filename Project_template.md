@@ -86,30 +86,8 @@
 
 #### Диаграмма контекста АСУ «Теплый дом»
 
-```puml
-@startuml
-
-
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
-
-SHOW_PERSON_OUTLINE()
-
-LAYOUT_WITH_LEGEND()
-
-title Контекст, Автоматизированная система управления отоплением «Теплый дом»
-
-Person(user, "Пользователь", "Пользователь АСУ «Теплый дом»")
-System(acs, "АСУ «Теплый дом»", "Сообщает пользователю статус, управляет системой отопления")
-System_Ext(heater, "Система отопления", "Аппаратный контроллер системы отопления")
-System_Ext(sensor, "Датчик температуры", "Сообщает телеметрию в АСУ «Теплый дом»")
-
-Rel(user, acs, "использует")
-Rel(acs, heater, "команды")
-Rel_Back(acs, sensor, "телеметрия")
-
-
-@enduml
-```
+- [ER диаграмма устройств](diagrams/context/context-general.puml)
+  ![ER диаграмма устройств](diagrams/context/context-general.png)
 
 # Задание 2. Проектирование микросервисной архитектуры
 
@@ -120,22 +98,22 @@ Rel_Back(acs, sensor, "телеметрия")
 **Диаграмма контейнеров (Containers)**
 
 - [Диаграмма контейнеров](diagrams/container/containers-diagram-general.puml)
-  ![Диаграмма контейнеров](diagrams/container/containers-diagram-general.puml)
+  ![Диаграмма контейнеров](diagrams/container/containers-diagram-general.png)
 
 **Диаграмма компонентов (Components)**
 
  - [Общая диаграмма компонентов](diagrams/component/components-diagram-general.puml)
-   ![Общая диаграмма компонентов](diagrams/component/components-diagram-general.puml)
+   ![Общая диаграмма компонентов](diagrams/component/components-diagram-general.png)
 
 **Диаграмма кода (Code)**
 
 - [Общая диаграмма компонентов](diagrams/code/device-control-core-class-diagram.puml)
-  ![Общая диаграмма компонентов](diagrams/code/device-control-core-class-diagram.puml)
+  ![Общая диаграмма компонентов](diagrams/code/device-control-core-class-diagram.png)
 
 # Задание 3. Разработка ER-диаграммы
 
 - [ER диаграмма устройств](diagrams/er/device-erd.puml)
-  ![ER диаграмма устройств](diagrams/er/device-erd.puml)
+  ![ER диаграмма устройств](diagrams/er/device-erd.png)
 
 # Задание 4. Создание и документирование API
 

@@ -1,0 +1,20 @@
+@startuml
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+SHOW_PERSON_OUTLINE()
+
+LAYOUT_WITH_LEGEND()
+
+title Контекст, Автоматизированная система управления отоплением «Теплый дом»
+
+Person(user, "Пользователь", "Пользователь АСУ «Теплый дом»")
+System(acs, "АСУ «Теплый дом»", "Сообщает пользователю статус, управляет системой отопления")
+System_Ext(heater, "Система отопления", "Аппаратный контроллер системы отопления")
+System_Ext(sensor, "Датчик температуры", "Сообщает телеметрию в АСУ «Теплый дом»")
+
+Rel(user, acs, "использует")
+Rel(acs, heater, "команды")
+Rel_Back(acs, sensor, "телеметрия")
+
+@enduml
