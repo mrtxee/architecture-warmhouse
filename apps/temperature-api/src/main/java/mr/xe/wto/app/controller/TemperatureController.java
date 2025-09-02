@@ -14,7 +14,8 @@ public class TemperatureController {
 
   @RequestMapping(
       value = {"/temperature", "/temperature/**"},
-      method = {RequestMethod.GET, RequestMethod.PATCH}
+      method = {RequestMethod.GET, RequestMethod.PATCH, RequestMethod.PUT, RequestMethod.TRACE, RequestMethod.POST,
+          RequestMethod.OPTIONS}
   )
   public String getTemperature() {
     return String.valueOf(RANDOM.nextInt(-50, 50));

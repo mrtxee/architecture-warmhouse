@@ -2,6 +2,8 @@
 ```bash
 
 cd C:\h\a\f\software-architect-cource\labs\sprint-1\architecture-warmhouse\apps\temperature-api
+cd /c/h/a/f/architecture-warmhouse/apps/temperature-api
+
 
 # собрать образ
 docker build -t temperature-api-img .
