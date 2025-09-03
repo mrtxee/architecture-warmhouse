@@ -1,0 +1,78 @@
+@startuml
+
+title Warmhouse Devices Entity Relations Diagram
+
+hide stereotype
+skinparam roundcorner 15
+skinparam linetype ortho
+
+entity home {
+  id : BIGINT <<PK>>
+  --
+  user_id : BIGINT
+  name : VARCHAR(128)
+  address : VARCHAR(512)
+  description : VARCHAR(1024)
+}
+
+entity room {
+  id : BIGINT <<PK>>
+  home_id_fk : BIGINT <<FK>>
+  --
+  name : VARCHAR(128)
+  description : VARCHAR(512)
+}
+home ||--|{ room
+
+entity device_type {
+  id : BIGINT <<PK>>
+  room_id_fk : BIGINT <<FK>>
+  --
+  vendor : VARCHAR(128)
+  model : VARCHAR(128)
+  version : VARCHAR(32)
+  functions : JSONB
+  status : JSONB
+}
+
+entity device {
+  id : BIGINT <<PK>>
+  room_id_fk : BIGINT <<FK>>
+  device_type_id_fk : BIGINT <<FK>>
+  --
+  name : VARCHAR(128)
+  description : VARCHAR(512)
+}
+device_type ||--o{ device
+room ||--|{ device
+
+entity device_automation_rule {
+  id : BIGINT <<PK>>
+  trigger_device_id_fk : BIGINT <<FK>>
+  action_device_id_fk : BIGINT <<FK>>
+  --
+  name : VARCHAR(128)
+  trigger_condition : JSONB
+  action : JSONB
+  isActive : BOOLEAN
+}
+device_automation_rule ||--|| device : trigger_device_id_fk
+device_automation_rule ||--|| device : action_device_id_fk
+
+entity device_schedule_rule {
+  id : BIGINT <<PK>>
+  trigger_device_id_fk : BIGINT <<FK>>
+  --
+  name : VARCHAR(128)
+  cron_expression : VARCHAR(128)
+  timezone : VARCHAR(128)
+  action : JSONB
+  isActive : BOOLEAN
+}
+device_schedule_rule ||--|| device : action_device_id_fk
+
+note right of home
+  Таблица пользователей находится в другом контейнере
+end note
+
+@enduml

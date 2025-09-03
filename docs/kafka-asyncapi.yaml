@@ -1,0 +1,178 @@
+asyncapi: 3.0.0
+info:
+  title: Warmhouse Microservices Communication Platform
+  version: 1.0.0
+  description: Взаимодействие между микросервисами и централизованное логирование
+  contact:
+    name: yandex practicum team
+    email: mrtxee@ya.ru
+
+servers:
+  kafka-production:
+    host: kafka://kafka-cluster.warmhouse.com:9092
+    protocol: kafka
+    security:
+      - $ref: '#/components/securitySchemes/saslSsl'
+
+channels:
+  task.requests:
+    address: tasks.requests
+    description: Канал для отправки заданий микросервисам
+    $ref: '#/components/messages/TaskRequestMessage'
+
+  tasks.status:
+    address: tasks.status
+    description: Канал для обновления статуса заданий
+    $ref: '#/components/messages/TaskStatusMessage'
+
+  # Logging channels
+  logs.application:
+    address: logs.application
+    description: Логи приложений (INFO, WARN, ERROR)
+    $ref: '#/components/messages/AppLogMessage'
+
+  logs.metrics:
+    address: logs.metrics
+    description: Метрики производительности и здоровья сервисов
+    messages:
+      metricMessage:
+        $ref: '#/components/messages/MetricMessage'
+
+components:
+  messages:
+    TaskRequestMessage:
+      name: taskRequestMessage
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TaskRequest'
+      headers:
+        $ref: '#/components/schemas/MessageHeader'
+
+    TaskResponseMessage:
+      name: taskResponseMessage
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TaskResponse'
+      headers:
+        $ref: '#/components/schemas/MessageHeader'
+
+    TaskStatusMessage:
+      name: TaskStatusMessage
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/TaskStatus'
+      headers:
+        $ref: '#/components/schemas/MessageHeader'
+
+    AppLogMessage:
+      name: appLogMessage
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/AppLog'
+      headers:
+        $ref: '#/components/schemas/MessageHeader'
+
+    MetricMessage:
+      name: metricMessage
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/Metric'
+      headers:
+        $ref: '#/components/schemas/MessageHeader'
+
+  schemas:
+    TaskRequest:
+      type: object
+      required: [taskId, serviceName, taskType, payload]
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        serviceName:
+          type: string
+          description: Микросервис-обработчик
+        taskType:
+          type: string
+          enum: [PROCESS_DATA, GENERATE_REPORT, SEND_NOTIFICATION, VALIDATE_CONTENT]
+        payload:
+          type: object
+          description: Данные для обработки
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 10
+        timeoutMs:
+          type: integer
+          description: Таймаут выполнения в миллисекундах
+
+    TaskResponse:
+      type: object
+      required: [taskId, status, processedAt]
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [SUCCESS, FAILED, TIMEOUT]
+        result:
+          type: object
+          description: Результат выполнения
+
+    TaskStatus:
+      type: object
+      required: [taskId, status, timestamp]
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [PENDING, PROCESSING, COMPLETED, FAILED]
+        timestamp:
+          type: string
+          format: date-time
+
+    AppLog:
+      type: object
+      required: [level, message, timestamp, serviceName]
+      properties:
+        level:
+          type: string
+          enum: [DEBUG, INFO, WARN, ERROR, FATAL]
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        serviceName:
+          type: string
+
+    Metric:
+      type: object
+      required: [name, value, timestamp, serviceName]
+      properties:
+        name:
+          type: string
+        value:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+        serviceName:
+          type: string
+
+    MessageHeader:
+      type: object
+      properties:
+        messageId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    saslSsl:
+      type: scramSha512
+      description: SASL/SCRAM-SHA-512 authentication with SSL

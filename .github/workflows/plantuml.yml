@@ -1,0 +1,72 @@
+name: PlantUML Diagrams
+
+on:
+  push:
+    branches:
+      - off
+  pull_request:
+    branches:
+      - off
+
+jobs:
+  generate-diagrams:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Install PlantUML
+        run: sudo apt-get install plantuml
+
+      - name: Check diagram directories
+        run: |
+          mkdir -p diagrams
+
+      - name: Generate Diagrams
+        run: |
+          echo "Starting PlantUML processing..."
+          
+          # Обработка diagrams/*.puml
+          if ls diagrams/*.puml 1> /dev/null 2>&1; then
+            for file in diagrams/*.puml; do
+              echo "Processing: $file"
+              plantuml "$file"
+            done
+          else
+          echo "No files found in diagrams/*.puml"
+          fi
+          
+          # Обработка diagrams/*/*.puml
+          if ls diagrams/*/*.puml 1> /dev/null 2>&1; then
+            for file in diagrams/*/*.puml; do
+              echo "Processing: $file"
+              plantuml "$file" || echo "⚠️ Failed to process: $file (continuing...)"
+            done
+          else
+          echo "No files found in diagrams/*/*.puml"
+          fi
+
+          echo "Finished!"
+
+      - name: Commit Diagrams
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add diagrams/**/*.png
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            BRANCH_NAME=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+            echo "Using branch: $BRANCH_NAME"
+            git commit -m "Automated diagram generation"
+            git push origin HEAD:$BRANCH_NAME
+          fi
+        if: success()
